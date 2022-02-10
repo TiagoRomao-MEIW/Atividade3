@@ -5,7 +5,8 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tentativa3</title>
+    <title>MEIW | Integração Sistemas | Atividade 3</title>
+    <link rel="icon" type="image/x-icon" href="./favicon.ico">
     <style>
         body {
             background-color: darkslategray;
@@ -48,7 +49,7 @@
 </head>
 
 <body>
-    <h1>Pedir Cheque</h1>
+    <h1>EuroMil</h1>
     <div class="wrapper">
         <form class="form" id="frm1">
             <label id="NumConta">Número de Conta
@@ -63,25 +64,25 @@
             <br>
             <label id="numbers">Números da Aposta
                 <label>
-                    <input class="number" type="number" name="N1" placeholder="Nº" max="50" minlength="1" maxlength="2"
-                        required>
-                    <input class="number" type="number" name="N2" placeholder="Nº" max="50" minlength="1" maxlength="2"
-                        required>
-                    <input class="number" type="number" name="N3" placeholder="Nº" max="50" minlength="1" maxlength="2"
-                        required>
-                    <input class="number" type="number" name="N4" placeholder="Nº" max="50" minlength="1" maxlength="2"
-                        required>
-                    <input class="number" type="number" name="N5" placeholder="Nº" max="50" minlength="1" maxlength="2"
-                        required>
+                    <input class="number" type="number" name="N1" placeholder="Nº" min="1" max="50" minlength="1"
+                        maxlength="2" required>
+                    <input class="number" type="number" name="N2" placeholder="Nº" min="1" max="50" minlength="1"
+                        maxlength="2" required>
+                    <input class="number" type="number" name="N3" placeholder="Nº" min="1" max="50" minlength="1"
+                        maxlength="2" required>
+                    <input class="number" type="number" name="N4" placeholder="Nº" min="1" max="50" minlength="1"
+                        maxlength="2" required>
+                    <input class="number" type="number" name="N5" placeholder="Nº" min="1" max="50" minlength="1"
+                        maxlength="2" required>
                 </label>
             </label>
             <br>
             <label id="stars">Estrelas da Aposta
                 <label>
-                    <input class="number" type="number" name="E1" placeholder="Nº" max="12" minlength="1" maxlength="2"
-                        required>
-                    <input class="number" type="number" name="E2" placeholder="Nº" max="12" minlength="1" maxlength="2"
-                        required>
+                    <input class="number" type="number" name="E1" placeholder="Nº" min="1" max="12" minlength="1"
+                        maxlength="2" required>
+                    <input class="number" type="number" name="E2" placeholder="Nº" min="1" max="12" minlength="1"
+                        maxlength="2" required>
                 </label>
             </label>
             <br>
@@ -102,13 +103,14 @@
             const frm = document.getElementById("frm1");
             var chk_status = frm.checkValidity();
             var formData = new FormData(form[0]);
+            var URL = "https://cors-anywhere.herokuapp.com/http://ken.utad.pt:8181/check/";
+
             var NConta = formData.get('NumConta');
             var Val = 10; //formData.get('ValorCheque');
-            var URL = "https://cors-anywhere.herokuapp.com/http://ken.utad.pt:8181/check/";
-            var check_date = "";
-            var checkID = "";
-            var gRPC_check = "";
-            var gRPC_key = "";
+            var check_date;
+            var checkID;
+            var gRPC_check; 
+            var gRPC_key;
 
             console.log("Número de Conta:", formData.get('NumConta'));
             console.log("Valor do Cheque:", formData.get('ValorCheque'));
@@ -181,7 +183,7 @@
                                 'N2') + ", " +
                             formData.get('N3') + ", " + formData.get('N4') + " e " + formData.get('N5') +
                             '\n' + "Estrelas da Aposta: " + formData.get('E1') + ", " + formData.get(
-                                'E2') + '\n' + '\n' + "APOSTA RESGISTADA COM SUCESSO"); // APOSTA COM SUCESSO
+                                'E2') + '\n' + '\n' + "APOSTA RESGISTADA COM SUCESSO!"); // APOSTA COM SUCESSO
 
                     } else if (xmlhttp.readyState === 4 && xmlhttp.status === 400) {
                         alert("APOSTA NÃO RESGISTADA!"); // ERRO NA APOSTA
