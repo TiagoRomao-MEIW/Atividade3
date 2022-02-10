@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tentativa3</title>
+    <style>
+        body {
+            background-color: darkslategray;
+            color: white;
+        }
+
+        .wrapper {
+            width: 400px;
+            max-width: 90%;
+            margin-top: 0 auto;
+        }
+
+        .wrapper label {
+            display: block;
+            margin: 0.5em 0;
+        }
+
+        .wrapper form {
+            font-size: 18px;
+            padding: 0.5em;
+        }
+
+        .number {
+            width: 35px;
+        }
+
+        .wrapper label input {
+            font-size: 18px;
+            padding: 0.5em;
+        }
+
+        .wrapper input[type="submit"] {
+            font-size: 20px;
+            font-style: italic;
+            background-color: gold;
+            color: blue;
+
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Pedir Cheque</h1>
+    <div class="wrapper">
+        <form class="form" id="frm1">
+            <label id="NumConta">Número de Conta
+                <input type="number" name="NumConta" placeholder="Nº Conta" min="10000000" max="99999999" required>
+
+            </label>
+            <br>
+            <label id="ValorCheque">Valor do Cheque
+                <input type="number" name="ValorCheque" placeholder="Valor do Cheque" value="10" disabled>
+
+            </label>
+            <br>
+            <label id="numbers">Números da Aposta
+                <label>
+                    <input class="number" type="number" name="N1" placeholder="Nº" max="50" minlength="1" maxlength="2"
+                        required>
+                    <input class="number" type="number" name="N2" placeholder="Nº" max="50" minlength="1" maxlength="2"
+                        required>
+                    <input class="number" type="number" name="N3" placeholder="Nº" max="50" minlength="1" maxlength="2"
+                        required>
+                    <input class="number" type="number" name="N4" placeholder="Nº" max="50" minlength="1" maxlength="2"
+                        required>
+                    <input class="number" type="number" name="N5" placeholder="Nº" max="50" minlength="1" maxlength="2"
+                        required>
+                </label>
+            </label>
+            <br>
+            <label id="stars">Estrelas da Aposta
+                <label>
+                    <input class="number" type="number" name="E1" placeholder="Nº" max="12" minlength="1" maxlength="2"
+                        required>
+                    <input class="number" type="number" name="E2" placeholder="Nº" max="12" minlength="1" maxlength="2"
+                        required>
+                </label>
+            </label>
+            <br>
+            <input type="submit" value="APOSTAR" name="submit">
+        </form>
+    </div>
+    <div class="GetCheckID">
+
+    </div>
+
+    <script>
+        const wrapper = document.querySelector('.wrapper'),
+            form = wrapper.querySelectorAll('.form'),
+            submitInput = form[0].querySelector('input[type="submit"]');
+
+        function getDadosForm(e) {
+            e.preventDefault();
+            const frm = document.getElementById("frm1");
+            var chk_status = frm.checkValidity();
+            var formData = new FormData(form[0]);
+            var NConta = formData.get('NumConta');
+            var Val = 10; //formData.get('ValorCheque');
+            var URL = "https://cors-anywhere.herokuapp.com/http://ken.utad.pt:8181/check/";
+            var check_date = "";
+            var checkID = "";
+            var gRPC_check = "";
+            var gRPC_key = "";
+
+            console.log("Número de Conta:", formData.get('NumConta'));
+            console.log("Valor do Cheque:", formData.get('ValorCheque'));
+            console.log("Status: ", chk_status)
+            console.log("Validity: ", frm.reportValidity());
+
+            console.log("Variável NConta:", NConta);
+            console.log("Variável Val:", Val);
+            if (chk_status) {
+                var xmlhttp = new XMLHttpRequest();
+                xmlhttp.open("GET", URL + NConta + "/amount/" + Val, true);
+                xmlhttp.onreadystatechange = function () {
+                    if (xmlhttp.readyState === 4 && xmlhttp.status === 200) {
+                        var dados = JSON.parse(xmlhttp.responseText);
+                        const {
+                            check_date,
+                            checkID
+                        } = dados;
+
+
+                        console.log("Variável check_date:", Date(check_date));
+                        console.log("Variável checkID:", checkID);
+
+                        const gRPC_key = formData.get('N1') + " " + formData.get('N2') + " " + formData.get('N3') +
+                            " " + formData
+                            .get('N4') + " " + formData.get('N5') + " " + formData.get('E1') + " " + formData.get(
+                                'E2');;
+                        const gRPC_check = checkID;
+
+                        console.log("OUT | Variável check_date:", Date(check_date));
+                        console.log("OUT | Variável checkID:", checkID);
+                        console.log("OUT | Variável gRPC_key:", gRPC_key);
+                        console.log("OUT | Variável gRPC_check:", gRPC_check);
+
+                        function client(gRPC_key, gRPC_check) {
+
+                            //Pacotes necessários
+                            const grpc = require('@grpc/grpc-js');
+                            const protoLoader = require('@grpc/proto-loader');
+                            //Caminho do ficheiro Protocol Buffers (versão proto3)
+                            const PROTO_PATH = "./proto/EuroMil.proto";
+
+                            var protoObj = protoLoader.loadSync(PROTO_PATH);
+                            const EMilDefinition = grpc.loadPackageDefinition(protoObj).Euromil;
+                            const client = new EMilDefinition('ken.utad.pt:8282', grpc.credentials
+                                .createInsecure());
+
+                            // Envio do pedido
+                            client.RegisterEuroMil({
+                                    gRPC_key,
+                                    gRPC_check
+                                }
+                                //{"key": "10 20 30 40 50 60 70","checkID": "1234567812345678"}
+                                , (err, message) => {
+                                    if (err) throw err;
+                                    console.log(message)
+                                });
+
+
+                        };
+
+                        alert("Número de Conta: " + formData.get('NumConta') +
+                            /*'\n' + "Valor do Cheque: " + formData
+                                                       .get(
+                                                           'ValorCheque') + */
+                            '\n' + "Data do Cheque: " + Date(check_date) + '\n' +
+                            "Número do Cheque: " +
+                            checkID + '\n' + '\n' + "Números da Aposta: " + formData.get('N1') + ", " + formData
+                            .get(
+                                'N2') + ", " +
+                            formData.get('N3') + ", " + formData.get('N4') + " e " + formData.get('N5') +
+                            '\n' + "Estrelas da Aposta: " + formData.get('E1') + ", " + formData.get(
+                                'E2') + '\n' + '\n' + "APOSTA RESGISTADA COM SUCESSO"); // APOSTA COM SUCESSO
+
+                    } else if (xmlhttp.readyState === 4 && xmlhttp.status === 400) {
+                        alert("APOSTA NÃO RESGISTADA!"); // ERRO NA APOSTA
+                        console.log(xmlhttp.readyState)
+                        console.log(xmlhttp.status)
+                    }
+                    /*} else  {
+                        alert("APOSTA NÃO RESGISTADA!"); // ERRO NA APOSTA
+                        console.log(xmlhttp.readyState)
+                        console.log(xmlhttp.status)
+                    } */
+                    ;
+                    console.log(xmlhttp.readyState)
+                    console.log(xmlhttp.status)
+                };
+                xmlhttp.send();
+            }
+
+            console.log("OUT | Variável check_date:", Date(check_date));
+            console.log("OUT | Variável checkID:", checkID);
+            console.log("OUT | Variável gRPC_key:", gRPC_key);
+            console.log("OUT | Variável gRPC_check:", gRPC_check);
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            submitInput.addEventListener('click', getDadosForm, false)
+        }, false)
+    </script>
+</body>
+
+</html>
